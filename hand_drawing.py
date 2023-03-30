@@ -70,6 +70,7 @@ while True:
     # 3. Checar quais dedos estão levantados - para selecionar os necessários
         fingers = Vanze.fingers_up()
         print(fingers)
+        
     # 4. If selection mode
     # 5. Drawing mode
 

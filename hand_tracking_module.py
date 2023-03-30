@@ -97,7 +97,7 @@ class VanzeDetector():
         fingers = []
 
         # dedão - analisado diferente por que o dedão se comporta de maneira diferente. Não desce no eixo y que nem os outros dedos
-        if self.required_landmark_list[self.tip_ids[0]][1] < self.required_landmark_list[self.tip_ids[0] - 1][1]: fingers.append(1)
+        if self.required_landmark_list[self.tip_ids[0]][1] > self.required_landmark_list[self.tip_ids[0] - 1][1]: fingers.append(1)
         else: fingers.append(0)
 
         # Para os outros 4 dedos
