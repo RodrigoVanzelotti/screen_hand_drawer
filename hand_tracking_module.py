@@ -79,7 +79,7 @@ class VanzeDetector():
         if self.results.multi_hand_landmarks:
             my_hand = self.results.multi_hand_landmarks[hand_number]
             for id, lm in enumerate(my_hand.landmark):
-                height, width, channels = img.shape
+                height, width, _ = img.shape
                 center_x, center_y = int(lm.x*width), int(lm.y*height)
 
                 self.required_landmark_list.append([id, center_x, center_y])  
@@ -97,12 +97,12 @@ class VanzeDetector():
         fingers = []
 
         # dedão - analisado diferente por que o dedão se comporta de maneira diferente. Não desce no eixo y que nem os outros dedos
-        if self.required_landmark_list[self.tip_ids[0]][1] > self.required_landmark_list[self.tip_ids[0] - 1][1]: fingers.append(1)
+        if self.required_landmark_list[self.tip_ids[0]][1] < self.required_landmark_list[self.tip_ids[0] - 1][1]: fingers.append(1)
         else: fingers.append(0)
 
         # Para os outros 4 dedos
         for id in range(1, 5):
-            if self.required_landmark_list[self.tip_ids[id][2]] < self.required_landmark_list[self.tip_ids[id] - 2][2]: fingers.append(1)
+            if self.required_landmark_list[self.tip_ids[id]][2] < self.required_landmark_list[self.tip_ids[id] - 2][2]: fingers.append(1)
             else: fingers.append(0)
 
         return fingers
