@@ -43,17 +43,23 @@ cam_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 # hand_tracking class   
 Vanze = htm.VanzeDetector(min_detec_confidence=0.85)    # minimizar erros
 
+# Definir o tamanho inicial do pincel
+thickness = 5
+
 # loop para colar o header e pintar a tela
 while True:
     '''
     1. import image
     2. achar os landmarks - usando o module
     3. Checar quais dedos estão levantados - para selecionar os necessários
-    4. If selection mode - dois dedos acima
+    4. If eraser mode - dois dedos acima
         - Select, not draw
     5. Drawing mode - dedo principal acima
         - Free drawing
+    6. Selecting size mode - três dedos pra cima
     '''
+    # reset hands_on feature
+    hands_on = False
     # 1. import image
     _, img = capture.read()
     img = cv2.flip(img, 1)  # invertendo a imagem para que o desenho seja natural, intuitivo
@@ -63,16 +69,41 @@ while True:
     landmark_list = Vanze.find_position(img, draw_hands=False)
 
     if len(landmark_list) != 0:
+        hands_on = True
         #     print(landmark_list)
-        x1, y1 = landmark_list[8][1:]       # dedo principal - acessar imagem nos assets
+        x1, y1 = landmark_list[8][1:]       # dedo indicador - acessar imagem nos assets
         x2, y2 = landmark_list[12][1:]      # dedo do meio
+        x3, y3 = landmark_list[16][1:]      # dedo anelar
 
     # 3. Checar quais dedos estão levantados - para selecionar os necessários
         fingers = Vanze.fingers_up()
-        print(fingers)
-        
-    # 4. If selection mode
+        # print(fingers)
+
     # 5. Drawing mode
+        if fingers[1] and not (fingers[2] or fingers[3]):
+            print('drawing mode')
+            img = Vanze.draw_in_position(img, [x1], [y1], (0, 0, 255), thickness)
+            cv2.circle(img, (x1, y1), thickness, (0, 255, 0), -1)
+            header = overlay_images[1]
+
+    # 4. Eraser mode
+        elif fingers[1] and fingers[2] and not fingers[3]:
+            print('Eraser mode')
+            img = Vanze.draw_in_position(img, [x1, x2], [y1, y2], (0, 0, 255), thickness)
+            header = overlay_images[2]
+    
+    # 6. Selecting size mode
+        elif fingers[1] and fingers[2] and fingers[3]:
+            print('sizing mode')
+            img = Vanze.draw_in_position(img, [x1, x2, x3], [y1, y2, y3], (255, 0, 0), thickness)
+            cv2.circle(img, (x1, y1), thickness, (255, 0, 0), -1)
+            header = overlay_images[3]
+            
+    # If none of those commands, return to main header
+        else: hands_on = False
+
+    if not hands_on:    
+        header = overlay_images[0]
 
     # colando o header correto
     img[0:header.shape[0], 0:cam_width] = header
