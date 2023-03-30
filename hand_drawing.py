@@ -59,7 +59,7 @@ while True:
     img = cv2.flip(img, 1)  # invertendo a imagem para que o desenho seja natural, intuitivo
     
     # 2. achar os landmarks - usando o module
-    img = Vanze.find_hands(img, draw_hands=False)
+    img = Vanze.find_hands(img, draw_hands=True)
     landmark_list = Vanze.find_position(img, draw_hands=False)
 
     if len(landmark_list) != 0:
