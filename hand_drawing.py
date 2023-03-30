@@ -65,11 +65,11 @@ while True:
     if len(landmark_list) != 0:
         #     print(landmark_list)
         x1, y1 = landmark_list[8][1:]       # dedo principal - acessar imagem nos assets
-        x1, y1 = landmark_list[12][1:]      # dedo do meio
-
-        
+        x2, y2 = landmark_list[12][1:]      # dedo do meio
 
     # 3. Checar quais dedos estão levantados - para selecionar os necessários
+        fingers = Vanze.fingers_up()
+        print(fingers)
     # 4. If selection mode
     # 5. Drawing mode
 

@@ -86,9 +86,7 @@ class VanzeDetector():
 
         return self.required_landmark_list
 
-    def fingers_up(self,
-                   img: webcam_image,
-                   ):
+    def fingers_up(self):
         '''
         Para essa função devemos examinar a ponta do dedo do dedo que queremos verificar, para dar o veredito se ele está levantado ou não
         Para isso, vamos analisar sempre a ponta do dedo e dois landmarks abaixo deste. Como por exemplo:
