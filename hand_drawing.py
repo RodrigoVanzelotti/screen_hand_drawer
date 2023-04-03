@@ -3,8 +3,8 @@ import mediapipe as mp
 import numpy as np
 import time
 import os       # para acessar nossas imagens
+from math import ceil
 
-from typing import Union
 import hand_tracking_module as htm
 
 # Tipagem =================
@@ -41,7 +41,8 @@ def draw_and_return_coords(xa: coordinates,
 # =========================
 
 # lendo todas files no nosso folder e criando uma lista de imagens que serão lidas pelo cv2
-folder_path = "drawing_options"
+# folder_path = "headers_folder"
+folder_path = "hf"
 files = os.listdir(folder_path)
 overlay_images = []
 
@@ -93,8 +94,8 @@ while True:
     img = cv2.flip(img, 1)  # invertendo a imagem para que o desenho seja natural, intuitivo
     
     # 2. achar os landmarks - usando o module
-    img = Vanze.find_hands(img, draw_hands=True)
-    landmark_list = Vanze.find_position(img, draw_hands=False)
+    img = Vanze.find_hands(img)#, draw_hands=True)
+    landmark_list = Vanze.find_position(img)
 
     if len(landmark_list) != 0:
         #     print(landmark_list)
@@ -106,43 +107,52 @@ while True:
         fingers = Vanze.fingers_up()
         # print(fingers)
 
+    # Se qualquer seleção for feita, devemos zerar o nosso xp e yp
     # 4. Drawing mode
-        if fingers[1] and not (fingers[2] or fingers[3]):
+        if fingers[1] and not (fingers[2] or fingers[3] or fingers[4]):
             print('drawing mode')
-            img = Vanze.draw_in_position(img, [x1], [y1], (0, 0, 255), thickness)
-            cv2.circle(img, (x1, y1), thickness, draw_color, -1)
+            draw_color = (9, 232, 225)  
+
+            # dividindo o thickness por dois pq estamos tratando de raio [era possível trabalhar com cv2.circle (testar)]
+            # img = Vanze.draw_in_position(img, [x1], [y1], draw_color, int(thickness/2))
+            cv2.circle(img, (x1, y1), int(thickness/2), draw_color, -1)
+            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
+
             header = overlay_images[1]
 
-            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
-            # # se for a primeira iteração, atribuimos o x_anterior e y_anterior ao x1, y1
-            # if x_anterior == 0 and y_anterior == 0:
-            #     x_anterior, y_anterior = x1, y1
-            # # caso não seja, desenha a linha do P0 ao ponto atual
-            # else:
-            #     cv2.line(img, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
-            #     cv2.line(drawing_canvas, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
-
-            # # e se reinicia o processo
-            # x_anterior, y_anterior = x1, y1
-
-    # 5. Eraser mode
-        elif fingers[1] and fingers[2] and not fingers[3]:
-            print('Eraser mode')
-            img = Vanze.draw_in_position(img, [x1, x2], [y1, y2], (0, 0, 255), thickness)
+    # 5. Moving mode
+        elif fingers[1] and fingers[2] and not (fingers[3] or fingers[4]):
+            print('moving mode')            
+            x_anterior, y_anterior = 0, 0
             header = overlay_images[2]
-            
-            draw_color = (0, 0, 0)
-            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
     
     # 6. Selecting size mode
-        elif fingers[1] and fingers[2] and fingers[3]:
+        elif fingers[1] and fingers[2] and fingers[3] and not (fingers[4]):
             print('sizing mode')
-            img = Vanze.draw_in_position(img, [x1, x2, x3], [y1, y2, y3], (255, 0, 0), thickness)
-            cv2.circle(img, (x1, y1), thickness, (255, 0, 0), -1)
+            draw_color = (186, 222, 9) 
+            x_anterior, y_anterior = 0, 0
+
+            thickness = ceil(x2/10) if x2 > 1 else thickness
+
+            cv2.circle(img, (x1, y1), int(thickness/2), draw_color, -1)
             header = overlay_images[3]
+
+    # 7. Erasing mode
+        elif not (fingers[1] and fingers[2] and fingers[3] and fingers[4]):
+            print('Eraser mode')
+
+            draw_color = (0, 0, 0)
+            # img = Vanze.draw_in_position(img, [x1], [y1], draw_color, int(thickness/2))
+            
+            cv2.circle(img, (x1, y1), int(thickness/2), draw_color, -1)
+            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
+
+            header = overlay_images[-1]
             
     # If none of those commands, return to main header
-        else: header = overlay_images[0]
+        else: 
+            x_anterior, y_anterior = 0, 0
+            header = overlay_images[0]
 
     # Processo de criação de mascara para que seja possível dar o merge entre as imagens
     # criando uma imagem em cinza do nosso drawing_canvas -> é uma parte complicada, fazer com calma
@@ -168,7 +178,7 @@ while True:
     # solução possível, blend, mas não uma sobreposição
     # img = cv2.addWeighted(img, 0.5, drawing_canvas, 0.5, 0)
 
-    cv2.imshow("Image", img)
+    cv2.imshow("Asimov Image", img)
     cv2.imshow("Drawing Canvas", drawing_canvas) # -> mostrar na aula
     cv2.waitKey(1)  
 

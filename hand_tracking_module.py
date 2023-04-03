@@ -131,7 +131,7 @@ def main():
     Vanze = VanzeDetector()
 
     while True:
-        success, img = capture.read()
+        _, img = capture.read()
         
         img = Vanze.find_hands(img) #, draw_hands=False)
         landmark_list = Vanze.find_position(img) #, draw_hands=False)
