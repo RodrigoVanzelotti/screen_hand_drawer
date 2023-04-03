@@ -18,13 +18,14 @@ Type Hints podem ser usadas para verificar se o código está usando o tipo corr
 Type Hints podem ser usadas para otimizar o código em tempo de execução. Por exemplo, se você usar Type Hints para especificar que uma variável contém um número inteiro, 
     o interpretador Python pode usar uma implementação mais rápida de operações matemáticas em vez de uma implementação genérica que funciona com qualquer tipo de dados.
 '''
+coordinates = int
 # =========================
 
 # Functions ===============
-def draw_and_return_coords(xa: int, 
-                           ya: int, 
-                           x: int, 
-                           y: int):
+def draw_and_return_coords(xa: coordinates, 
+                           ya: coordinates, 
+                           x: coordinates, 
+                           y: coordinates):
     if xa == 0 and ya == 0:
         xa, ya = x, y
     # caso não seja, desenha a linha do P0 ao ponto atual
@@ -129,6 +130,9 @@ while True:
             print('Eraser mode')
             img = Vanze.draw_in_position(img, [x1, x2], [y1, y2], (0, 0, 255), thickness)
             header = overlay_images[2]
+            
+            draw_color = (0, 0, 0)
+            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
     
     # 6. Selecting size mode
         elif fingers[1] and fingers[2] and fingers[3]:
@@ -140,8 +144,29 @@ while True:
     # If none of those commands, return to main header
         else: header = overlay_images[0]
 
+    # Processo de criação de mascara para que seja possível dar o merge entre as imagens
+    # criando uma imagem em cinza do nosso drawing_canvas -> é uma parte complicada, fazer com calma
+    # .cvtColor é uma função que permite converter uma imagem de um "colorspace" para outro. Como é o exemplo de BGR para RGB
+    img_gray = cv2.cvtColor(drawing_canvas, cv2.COLOR_BGR2GRAY)
+
+    # convertendo a imagem para binário e ao mesmo tempo invertendo-a
+    # Thresholding significa do inglês limiarização. É um método simples de segmentação de imagens e pode ser usado no processo de binarização
+    # NOTE iniciar jupyter de threshold
+    _, img_inverse = cv2.threshold(img_gray, 50, 255, cv2.THRESH_BINARY_INV)
+    img_inverse = cv2.cvtColor(img_inverse, cv2.COLOR_GRAY2BGR) # passando para BGR para fazer o merge, visto que a nossa imagem principal é BGR
+
+    # NOTE iniciar o jupyter de bitwise
+
+    # bitwise_and(src1, src2) -> dst     @Computes bitwise conjunction of the two arrays (dst = src1 & src2)
+    img = cv2.bitwise_and(img, img_inverse)
+    # bitwise_or(src1, src2) -> dst      @Calculates the per-element bit-wise disjunction of two arrays  (dst = src1 // src2)
+    img = cv2.bitwise_or(img, drawing_canvas)
+
     # colando o header correto
     img[0:header.shape[0], 0:cam_width] = header
+
+    # solução possível, blend, mas não uma sobreposição
+    # img = cv2.addWeighted(img, 0.5, drawing_canvas, 0.5, 0)
 
     cv2.imshow("Image", img)
     cv2.imshow("Drawing Canvas", drawing_canvas) # -> mostrar na aula
