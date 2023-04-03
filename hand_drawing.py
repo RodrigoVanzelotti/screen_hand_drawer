@@ -20,6 +20,25 @@ Type Hints podem ser usadas para otimizar o código em tempo de execução. Por 
 '''
 # =========================
 
+# Functions ===============
+def draw_and_return_coords(xa: int, 
+                           ya: int, 
+                           x: int, 
+                           y: int):
+    if xa == 0 and ya == 0:
+        xa, ya = x, y
+    # caso não seja, desenha a linha do P0 ao ponto atual
+    else:
+        cv2.line(img, (xa, ya), (x, y), draw_color, thickness)
+        cv2.line(drawing_canvas, (xa, ya), (x, y), draw_color, thickness)
+
+    # e se reinicia o processo
+    xa, ya = x, y
+
+    return xa, ya
+
+# =========================
+
 # lendo todas files no nosso folder e criando uma lista de imagens que serão lidas pelo cv2
 folder_path = "drawing_options"
 files = os.listdir(folder_path)
@@ -93,16 +112,17 @@ while True:
             cv2.circle(img, (x1, y1), thickness, draw_color, -1)
             header = overlay_images[1]
 
-            # se for a primeira iteração, atribuimos o x_anterior e y_anterior ao x1, y1
-            if x_anterior == 0 and y_anterior == 0:
-                x_anterior, y_anterior = x1, y1
-            # caso não seja, desenha a linha do P0 ao ponto atual
-            else:
-                cv2.line(img, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
-                cv2.line(drawing_canvas, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
+            x_anterior, y_anterior = draw_and_return_coords(x_anterior, y_anterior, x1, y1)
+            # # se for a primeira iteração, atribuimos o x_anterior e y_anterior ao x1, y1
+            # if x_anterior == 0 and y_anterior == 0:
+            #     x_anterior, y_anterior = x1, y1
+            # # caso não seja, desenha a linha do P0 ao ponto atual
+            # else:
+            #     cv2.line(img, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
+            #     cv2.line(drawing_canvas, (x_anterior, y_anterior), (x1, y1), draw_color, thickness)
 
-            # e se reinicia o processo
-            x_anterior, y_anterior = x1, y1
+            # # e se reinicia o processo
+            # x_anterior, y_anterior = x1, y1
 
     # 5. Eraser mode
         elif fingers[1] and fingers[2] and not fingers[3]:
@@ -124,6 +144,6 @@ while True:
     img[0:header.shape[0], 0:cam_width] = header
 
     cv2.imshow("Image", img)
-    # cv2.imshow("Drawing Canvas", drawing_canvas) -> mostrar na aula
+    cv2.imshow("Drawing Canvas", drawing_canvas) # -> mostrar na aula
     cv2.waitKey(1)  
 
