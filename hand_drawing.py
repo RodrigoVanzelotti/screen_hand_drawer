@@ -42,7 +42,7 @@ def draw_and_return_coords(xa: coordinates,
 
 # lendo todas files no nosso folder e criando uma lista de imagens que serão lidas pelo cv2
 # folder_path = "headers_folder"
-folder_path = "hf"
+folder_path = "final_headers"
 files = os.listdir(folder_path)
 overlay_images = []
 
