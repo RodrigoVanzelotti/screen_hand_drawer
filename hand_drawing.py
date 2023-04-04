@@ -111,7 +111,8 @@ while True:
     # 4. Drawing mode
         if fingers[1] and not (fingers[2] or fingers[3] or fingers[4]):
             print('drawing mode')
-            draw_color = (9, 232, 225)  
+            # draw_color = (9, 232, 225)  
+            draw_color = (254, 220, 156)
 
             # dividindo o thickness por dois pq estamos tratando de raio [era possível trabalhar com cv2.circle (testar)]
             # img = Vanze.draw_in_position(img, [x1], [y1], draw_color, int(thickness/2))
@@ -129,7 +130,8 @@ while True:
     # 6. Selecting size mode
         elif fingers[1] and fingers[2] and fingers[3] and not (fingers[4]):
             print('sizing mode')
-            draw_color = (186, 222, 9) 
+            # draw_color = (186, 222, 9) 
+            draw_color = (9, 232, 225)
             x_anterior, y_anterior = 0, 0
 
             thickness = ceil(x2/10) if x2 > 1 else thickness
